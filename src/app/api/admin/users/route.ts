@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Gunakan service role key untuk bisa membuat user baru dari admin
-const supabaseAdmin = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!,
-  { auth: { autoRefreshToken: false, persistSession: false } }
-)
+function getSupabaseAdmin() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,6 +18,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 1. Buat user di auth
+    const supabaseAdmin = getSupabaseAdmin()
     const { data: authData, error: authErr } = await supabaseAdmin.auth.admin.createUser({
       email,
       password,
@@ -48,6 +50,7 @@ export async function DELETE(req: NextRequest) {
     const { userId } = await req.json()
     if (!userId) return NextResponse.json({ error: 'userId wajib diisi.' }, { status: 400 })
 
+    const supabaseAdmin = getSupabaseAdmin()
     const { error } = await supabaseAdmin.auth.admin.deleteUser(userId)
     if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
