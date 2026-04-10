@@ -1,0 +1,92 @@
+import { createClient } from '@/lib/supabase/server'
+import { redirect } from 'next/navigation'
+import { format } from 'date-fns'
+import { id as localeId } from 'date-fns/locale'
+import { ClipboardList, Package } from 'lucide-react'
+
+const STATUS_LABEL: Record<string, string> = {
+  pending: 'Menunggu',
+  approved: 'Disetujui',
+  rejected: 'Ditolak',
+  returned: 'Dikembalikan',
+}
+
+export default async function PeminjamanSayaPage() {
+  const supabase = await createClient()
+  const { data: { user } } = await supabase.auth.getUser()
+  if (!user) redirect('/login')
+
+  const { data: borrowings } = await supabase
+    .from('tool_borrowings')
+    .select('*, inventory(name, category)')
+    .eq('user_id', user.id)
+    .order('created_at', { ascending: false })
+
+  return (
+    <div className="page-content">
+      <div className="page-header">
+        <h1>Peminjaman Saya</h1>
+        <p>Riwayat dan status peminjaman alat Anda</p>
+      </div>
+
+      {!borrowings || borrowings.length === 0 ? (
+        <div className="card">
+          <div className="empty-state">
+            <ClipboardList size={48} />
+            <h3>Belum ada peminjaman</h3>
+            <p>Anda belum pernah mengajukan peminjaman alat</p>
+          </div>
+        </div>
+      ) : (
+        <div className="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>Alat</th>
+                <th>Kategori</th>
+                <th>Jumlah</th>
+                <th>Tanggal Pinjam</th>
+                <th>Tanggal Kembali</th>
+                <th>Tujuan</th>
+                <th>Status</th>
+                <th>Catatan Admin</th>
+              </tr>
+            </thead>
+            <tbody>
+              {borrowings.map(b => {
+                const inv = b.inventory as { name: string; category: string } | null
+                return (
+                  <tr key={b.id}>
+                    <td>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <Package size={14} color="var(--accent-secondary)" />
+                        <span style={{ fontWeight: 500, color: 'var(--text-primary)' }}>{inv?.name ?? '-'}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span style={{ textTransform: 'capitalize' }}>{inv?.category ?? '-'}</span>
+                    </td>
+                    <td>{b.quantity} unit</td>
+                    <td>{format(new Date(b.start_date), 'd MMM yyyy', { locale: localeId })}</td>
+                    <td>{format(new Date(b.end_date), 'd MMM yyyy', { locale: localeId })}</td>
+                    <td style={{ maxWidth: 160 }}>
+                      <span style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                        {b.purpose ?? '-'}
+                      </span>
+                    </td>
+                    <td>
+                      <span className={`badge badge-${b.status}`}>{STATUS_LABEL[b.status]}</span>
+                    </td>
+                    <td style={{ color: 'var(--text-muted)', fontStyle: b.admin_note ? 'normal' : 'italic' }}>
+                      {b.admin_note ?? 'Belum ada catatan'}
+                    </td>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  )
+}
