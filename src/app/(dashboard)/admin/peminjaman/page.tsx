@@ -105,7 +105,7 @@ export default function AdminPeminjamanPage() {
         5: { cellWidth: 24 }, 6: { cellWidth: 24 },
         7: { halign: 'center', cellWidth: 24 },
       },
-      didDrawCell: (hookData: { section: string; column: { index: number }; cell: { raw: string | number | null | undefined; styles: { textColor: number[] } } }) => {
+      didDrawCell: (hookData: any) => {
         if (hookData.section === 'body' && hookData.column.index === 7) {
           const s = String(hookData.cell.raw ?? '')
           const colors: Record<string, number[]> = {
