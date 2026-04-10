@@ -412,7 +412,7 @@ export default function AdminInventarisPage() {
               <div className="grid-2">
                 <div>
                   <label className="label">Merk / Brand</label>
-                  <input className="input" type="text" placeholder="Contoh: Sony, Canon, dll." value={form.merk} onChange={e => setForm(p => ({ ...p, merk: e.target.value }))} />
+                  <input className="input" type="text" placeholder="Contoh: Sony, Canon, dll." value={form.merk ?? ''} onChange={e => setForm(p => ({ ...p, merk: e.target.value }))} />
                 </div>
                 <div>
                   <label className="label">Tahun Pembelian</label>
