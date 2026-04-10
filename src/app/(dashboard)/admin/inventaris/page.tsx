@@ -32,7 +32,7 @@ const CAT_COLORS: Record<string, { bg: string; color: string }> = {
   lainnya:    { bg: '#f1f5f9', color: '#475569' },
 }
 
-const emptyForm = { name: '', merk: '', category: 'elektronik', quantity: 0, available: 0, condition: 'baik', location: '', description: '', image_url: '', tahun_beli: new Date().getFullYear() }
+const emptyForm: Omit<InventoryItem, 'id'> = { name: '', merk: '', category: 'elektronik', quantity: 0, available: 0, condition: 'baik', location: '', description: '', image_url: '', tahun_beli: new Date().getFullYear() }
 
 export default function AdminInventarisPage() {
   const [items, setItems] = useState<InventoryItem[]>([])
